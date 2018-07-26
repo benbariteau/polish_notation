@@ -6,24 +6,35 @@ macro_rules! npn {
     [(+ $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (+ $($stack)*)) };
     [(- $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (- $($stack)*)) };
     [(* $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (* $($stack)*)) };
+    [(/ $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (/ $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (/ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * * $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (/ / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / / $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - * $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + * $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * + $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (/ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / + $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (/ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / - $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (/ * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / * $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (+ / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + / $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (- / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - / $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (* / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * / $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head + $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head - $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt * $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head * $head) $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> ($stack_head:tt / $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head / $head) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second + $stack_first) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second - $stack_first) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt * $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second * $stack_first) $($stack)*)) };
+    [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt / $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second / $stack_first) $($stack)*)) };
     [$first:tt $second:tt $($tail:tt)*] => { npn!(($($tail)*) -> ($second $first)) };
 }
 
@@ -60,8 +71,13 @@ mod tests {
     #[test]
     fn adds_substracts_and_multiplies_oh_my() { assert_eq!(npn!(* - - * * + + * * * 2 3 2 3 2 3 2 3 2 3 2), 482); }
 
-    /*
     #[test]
     fn basic_divide() { assert_eq!(npn!(/ 8 4), 2); }
-    */
+    #[test]
+    fn double_divide() { assert_eq!(npn!(/ 24 / 12 4), 8); }
+
+    #[test]
+    fn all_division_pairs() {
+        assert_eq!(npn!(/ + / - / * / / +  - / * / 128 2 4 2 64 192 4 2 4 2 32 2 16 8), 4);
+    }
 }
