@@ -84,4 +84,18 @@ mod tests {
         assert_eq!(npn!(* - 5 6 7), -7);
         assert_eq!(npn!(- * / 15 - 7 + 1 1 3 + 2 + 1 1), 5);
     }
+
+    #[test]
+    fn test_with_non_numbers() {
+        let foo = 3;
+        let bar = 12;
+        assert_eq!(npn!(/ bar foo), 4);
+
+        fn baz() -> i64 { 2 }
+        // TODO figure out how to do this without parens
+        assert_eq!(npn!(/ bar (baz())), 6);
+
+        // TODO figure out how to do this without parens
+        assert_eq!(npn!(+ foo (-3)), 0);
+    }
 }
