@@ -37,7 +37,7 @@ macro_rules! npn {
 }
 
 #[cfg(test)]
-mod tests {
+mod npn_tests {
     #[test]
     fn basic_add() { assert_eq!(npn!(+ 1 2), 3); }
     #[test]
@@ -97,5 +97,70 @@ mod tests {
 
         // TODO figure out how to do this without parens
         assert_eq!(npn!(+ foo (-3)), 0);
+    }
+}
+
+macro_rules! rpn {
+    // base cases
+    [() -> ()] => {};
+    [() -> ($stack:tt)] => {$stack};
+
+    // if we encounter an operator, take the last two expressions off the stack, and evaluate.
+    [(+ $($tail:tt)*) -> ($stack_first:tt $stack_second:tt $($stack:tt)*)] => { rpn!(($($tail)*) -> (($stack_second + $stack_first) $($stack)*)) };
+    [(- $($tail:tt)*) -> ($stack_first:tt $stack_second:tt $($stack:tt)*)] => { rpn!(($($tail)*) -> (($stack_second - $stack_first) $($stack)*)) };
+    [(* $($tail:tt)*) -> ($stack_first:tt $stack_second:tt $($stack:tt)*)] => { rpn!(($($tail)*) -> (($stack_second * $stack_first) $($stack)*)) };
+    [(/ $($tail:tt)*) -> ($stack_first:tt $stack_second:tt $($stack:tt)*)] => { rpn!(($($tail)*) -> (($stack_second / $stack_first) $($stack)*)) };
+
+    // if this is non-operator (a value), push onto the stack
+    [($head:tt $($tail:tt)*) -> ($($stack:tt)*)] => { rpn!(($($tail)*) -> ($head $($stack)*)) };
+
+    // this is the initialization step
+    [$first:tt $second:tt $($tail:tt)*] => { rpn!(($($tail)*) -> ($second $first)) };
+}
+
+#[cfg(test)]
+mod rpn_tests {
+    #[test]
+    fn basic_add() { assert_eq!(rpn!(1 2 +), 3); }
+    #[test]
+    fn double_add() { assert_eq!(rpn!(1 2 + 3 +), 6); }
+
+    #[test]
+    fn basic_subtract() { assert_eq!(rpn!(1 2 -), -1); }
+    #[test]
+    fn double_subtract() { assert_eq!(rpn!(5 2 - 4 -), -1); }
+
+    #[test]
+    fn basic_multiply() { assert_eq!(rpn!(3 2 *), 6); }
+    #[test]
+    fn double_multiply() { assert_eq!(rpn!(3 2 * 3 *), 18); }
+
+    #[test]
+    fn basic_divide() { assert_eq!(rpn!(8 4 /), 2); }
+    #[test]
+    fn double_divide() { assert_eq!(rpn!(24 12 4 / /), 8); }
+
+    #[test]
+    fn all_operators() {
+        assert_eq!(rpn!(2 3 + 5 * 15 - 5 /), 2);
+    }
+
+    #[test]
+    fn wikipedia_tests() {
+        assert_eq!(rpn!(15 7 1 1 + - / 3 * 2 1 1 + + -), 5);
+    }
+
+    #[test]
+    fn test_with_non_numbers() {
+        let foo = 3;
+        let bar = 12;
+        assert_eq!(rpn!(bar foo /), 4);
+
+        fn baz() -> i64 { 2 }
+        // TODO figure out how to do this without parens
+        assert_eq!(rpn!(bar (baz()) /), 6);
+
+        // TODO figure out how to do this without parens
+        assert_eq!(rpn!(foo (-3) +), 0);
     }
 }
