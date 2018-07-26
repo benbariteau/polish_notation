@@ -3,6 +3,7 @@ macro_rules! npn {
     [() -> ($stack:tt)] => {$stack};
     [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head + $head) $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> ($stack_head:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head - $head) $($stack)*)) };
     [$first:tt $second:tt $($tail:tt)*] => { npn!(($($tail)*) -> ($second $first)) };
 }
 
@@ -18,10 +19,10 @@ mod tests {
         assert_eq!(npn!(+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32), 528);
     }
 
-    /*
     #[test]
     fn basic_subtract() { assert_eq!(npn!(- 1 2), -1); }
 
+    /*
     #[test]
     fn basic_multiply() { assert_eq!(npn!(* 3 2), 6); }
 
