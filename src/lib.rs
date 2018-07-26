@@ -3,6 +3,8 @@ macro_rules! npn {
     [() -> ($stack:tt)] => {$stack};
     [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - - $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (+ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + - $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (- + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head + $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head - $head) $($stack)*)) };
     [$first:tt $second:tt $($tail:tt)*] => { npn!(($($tail)*) -> ($second $first)) };
@@ -24,6 +26,11 @@ mod tests {
     fn basic_subtract() { assert_eq!(npn!(- 1 2), -1); }
     #[test]
     fn double_subtract() { assert_eq!(npn!(- - 5 2 4), -1); }
+
+    #[test]
+    fn subtract_and_add() { assert_eq!(npn!(- + 1 2 3), 0); }
+    #[test]
+    fn add_and_subtract() { assert_eq!(npn!(+ - 1 2 3), 2); }
 
     /*
     #[test]
