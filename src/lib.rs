@@ -80,4 +80,10 @@ mod tests {
     fn all_division_pairs() {
         assert_eq!(npn!(/ + / - / * / / +  - / * / 128 2 4 2 64 192 4 2 4 2 32 2 16 8), 4);
     }
+
+    #[test]
+    fn wikipedia_tests() {
+        assert_eq!(npn!(* - 5 6 7), -7);
+        assert_eq!(npn!(- * / 15 - 7 + 1 1 3 + 2 + 1 1), 5);
+    }
 }
