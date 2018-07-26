@@ -16,25 +16,6 @@ macro_rules! npn {
     [($head:tt $($tail:tt)*) -> (* $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (/ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / $($stack)*)) };
 
-    // these mostly serve as a gate to the rules below, to guarantee we don't try to resolve an
-    // operator as a value
-    [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (- - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - - $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (* * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * * $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (/ / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / / $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (+ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + - $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (- + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - + $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (* - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * - $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (- * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - * $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (+ * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + * $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (* + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * + $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (/ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / + $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (/ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / - $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (/ * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / * $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (+ / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + / $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (- / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - / $($stack)*)) };
-    [($head:tt $($tail:tt)*) -> (* / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * / $($stack)*)) };
-
     // if we've gotten to here, we know that the first element on the stack isn't an operator and
     // neither is the next token, so we can safely produce an expresion from the next token and
     // top two elements on the stack and push it back onto the stack
