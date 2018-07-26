@@ -1,12 +1,20 @@
+//#![recursion_limit="128"]
+
 macro_rules! npn {
     [() -> ()] => {};
     [() -> ($stack:tt)] => {$stack};
+    [(+ $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (+ $($stack)*)) };
+    [(- $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (- $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (+ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + $($stack)*)) };
+    [($head:tt $($tail:tt)*) -> (- $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (+ - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head + $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head - $head) $($stack)*)) };
+    [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second + $stack_first) $($stack)*)) };
+    [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second - $stack_first) $($stack)*)) };
     [$first:tt $second:tt $($tail:tt)*] => { npn!(($($tail)*) -> ($second $first)) };
 }
 
@@ -31,6 +39,9 @@ mod tests {
     fn subtract_and_add() { assert_eq!(npn!(- + 1 2 3), 0); }
     #[test]
     fn add_and_subtract() { assert_eq!(npn!(+ - 1 2 3), 2); }
+    #[test]
+    fn adds_and_subtracts() { assert_eq!(npn!(+ - - + 1 2 - 3 + 4 5 6 7), 10); }
+
 
     /*
     #[test]
