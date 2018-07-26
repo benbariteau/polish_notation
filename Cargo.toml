@@ -2,5 +2,8 @@
 name = "polish_notation"
 version = "0.1.0"
 authors = ["Ben Bariteau <\"ben.bariteau@gmail.com\">"]
+license = "MIT"
+description = "Macros for polish notation and reverse polish notation math"
+repository = "http://github.com/firba1/polish_notation"
 
 [dependencies]
