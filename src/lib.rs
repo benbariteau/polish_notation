@@ -1,5 +1,3 @@
-//#![recursion_limit="128"]
-
 macro_rules! npn {
     [() -> ()] => {};
     [() -> ($stack:tt)] => {$stack};
