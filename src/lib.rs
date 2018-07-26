@@ -1,14 +1,23 @@
 macro_rules! npn {
+    // base cases
     [() -> ()] => {};
     [() -> ($stack:tt)] => {$stack};
+
+    // whenever there is an operator as the next token, always push it onto the stack
     [(+ $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (+ $($stack)*)) };
     [(- $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (- $($stack)*)) };
     [(* $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (* $($stack)*)) };
     [(/ $($tail:tt)*) -> ($($stack:tt)*)] => { npn!(($($tail)*) -> (/ $($stack)*)) };
+
+    // whenever the operator is at the top of the stack, always push the next token, since an
+    // operator needs at least two values to work
     [($head:tt $($tail:tt)*) -> (+ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (/ $($stack:tt)*)] => { npn!(($($tail)*) -> ($head / $($stack)*)) };
+
+    // these mostly serve as a gate to the rules below, to guarantee we don't try to resolve an
+    // operator as a value
     [($head:tt $($tail:tt)*) -> (+ + $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + + $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- - $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - - $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* * $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * * $($stack)*)) };
@@ -25,14 +34,24 @@ macro_rules! npn {
     [($head:tt $($tail:tt)*) -> (+ / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head + / $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (- / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head - / $($stack)*)) };
     [($head:tt $($tail:tt)*) -> (* / $($stack:tt)*)] => { npn!(($($tail)*) -> ($head * / $($stack)*)) };
+
+    // if we've gotten to here, we know that the first element on the stack isn't an operator and
+    // neither is the next token, so we can safely produce an expresion from the next token and
+    // top two elements on the stack and push it back onto the stack
     [($head:tt $($tail:tt)*) -> ($stack_head:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head + $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head - $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt * $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head * $head) $($stack)*)) };
     [($head:tt $($tail:tt)*) -> ($stack_head:tt / $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_head / $head) $($stack)*)) };
+
+    // sometimes the above rules fail to apply, usually in the case where an expression is placed
+    // onto the stack by one of the last 4 rules, meaning that the top 3 elements on the stack may
+    // be an expression that can be resolved.
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt + $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second + $stack_first) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt - $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second - $stack_first) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt * $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second * $stack_first) $($stack)*)) };
     [($($tail:tt)*) -> ($stack_first:tt $stack_second:tt / $($stack:tt)*)] => { npn!(($($tail)*) -> (($stack_second / $stack_first) $($stack)*)) };
+
+    // this is the initialization step
     [$first:tt $second:tt $($tail:tt)*] => { npn!(($($tail)*) -> ($second $first)) };
 }
 
