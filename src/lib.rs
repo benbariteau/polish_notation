@@ -1,3 +1,4 @@
+#[macro_export]
 macro_rules! npn {
     // base cases
     [() -> ()] => {};
@@ -100,6 +101,7 @@ mod npn_tests {
     }
 }
 
+#[macro_export]
 macro_rules! rpn {
     // base cases
     [() -> ()] => {};
