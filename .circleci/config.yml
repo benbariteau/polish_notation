@@ -1,0 +1,19 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: circleci/rust:1.41.0
+    steps:
+      - checkout
+      - run: cargo test
+workflows:
+  build:
+    triggers:
+      - schedule:
+            cron: "0 0 * * *"
+            filters:
+              branches:
+                only:
+                  - master
+    jobs:
+      - test
